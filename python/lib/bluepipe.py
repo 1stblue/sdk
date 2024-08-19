@@ -243,7 +243,7 @@ class BluePipe:
 
     def __signature(self, value) -> str:
         token = hmac.new(self.__access_key.encode('utf-8'), value.encode('utf-8'), sha1)
-        return base64.b64encode(token.digest()).decode('utf-8').rstrip('\n')
+        return token.hexdigest()
 
     def __http_call(self, method, address, queries=None, payload=None) -> Response:
 
