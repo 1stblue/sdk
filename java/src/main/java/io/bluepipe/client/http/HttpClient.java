@@ -1,19 +1,31 @@
 package io.bluepipe.client.http;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 public class HttpClient {
 
@@ -29,7 +41,17 @@ public class HttpClient {
 
     private final String prefix;
 
+    private final HttpClientConnectionManager connManager;
+
+    private final RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectionRequestTimeout(5, TimeUnit.SECONDS)
+            .setConnectionKeepAlive(TimeValue.ofSeconds(10))
+            .build();
+
     public HttpClient(String address) throws MalformedURLException {
+
+        this.connManager = new PoolingHttpClientConnectionManager();
+
         address = address.trim();
         if (!address.contains("://")) {
             address = "https://" + address;
@@ -68,11 +90,19 @@ public class HttpClient {
         return req;
     }
 
+    private CloseableHttpClient getClient() {
+        return HttpClientBuilder.create()
+                .setConnectionManager(connManager)
+                .setDefaultRequestConfig(requestConfig)
+                .setUserAgent(userAgent)
+                .build();
+    }
+
     private String requestPath(String path) {
         return prefix + path;
     }
 
-    private void doRequest(HttpUriRequestBase request) {
+    private void doRequest(HttpUriRequestBase request) throws IOException {
 
         int pos = request.getPath().indexOf("/");
         if (pos > 0) {
@@ -83,14 +113,34 @@ public class HttpClient {
         }
 
         // TODO: auth
-        request.setHeader("User-Agent", "Bluepipe Client");
-        request.setHeader("Accept", "application/json");
-
+        getClient().execute(server, request, new ResponseHandler());
     }
 
     public void post(String path, Object body) {
         //doRequest(new HttpPost(server, requestPath(path)));
 
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    static class ResponseHandler implements HttpClientResponseHandler<String> {
+
+        @JsonProperty("success")
+        private Boolean success;
+
+        @JsonProperty("message")
+        private String message;
+
+        @JsonProperty("data")
+        private Object data;
+
+        @Override
+        public String handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
+            if (response.getCode() / 100 != 2) {
+                throw new HttpException("HttpResponse: %d", response.getCode());
+            }
+
+            return "";
+        }
     }
 
 }
