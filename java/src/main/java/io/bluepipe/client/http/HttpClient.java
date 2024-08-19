@@ -4,16 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.utils.DateUtils;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
@@ -30,6 +32,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,6 +45,8 @@ public class HttpClient {
     private static final ObjectMapper jackson = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     private static final String userAgent = "1stblue.java/" + packageVersion();
+
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
@@ -89,18 +95,8 @@ public class HttpClient {
         return version;
     }
 
-    private static HttpUriRequestBase requestWithBody(HttpUriRequestBase req, Object content) throws JsonProcessingException {
-        if (content != null) {
-            if (content instanceof String) {
-                req.setHeader("Content-Type", "text/plain");
-                req.setEntity(new StringEntity((String) content, StandardCharsets.UTF_8));
-            } else {
-                req.setHeader("Content-Type", "application/json");
-                req.setEntity(new StringEntity(jackson.writeValueAsString(content), StandardCharsets.UTF_8));
-            }
-        }
-
-        return req;
+    private static String createNonce() {
+        return Long.toHexString(secureRandom.nextLong());
     }
 
     private CloseableHttpClient getClient() {
@@ -115,7 +111,7 @@ public class HttpClient {
         return prefix + path;
     }
 
-    private Object doRequest(HttpUriRequestBase request) throws IOException {
+    private Object doRequest(HttpUriRequestBase request, Object rawData) throws IOException {
         int pos = request.getPath().indexOf("/");
         if (pos > 0) {
             request.setHeader("Host", request.getPath().substring(0, pos));
@@ -124,13 +120,14 @@ public class HttpClient {
             request.setHeader("Host", defaultServerName);
         }
 
+        request.setHeader("Date", DateUtils.formatStandardDate(Instant.now()));
         request.setHeader("X-Api-Key", apiKey);
-        request.setHeader("X-Api-Nonce", "");
+        request.setHeader("X-Api-Nonce", createNonce());
 
         List<String> output = new ArrayList<>();
         for (Header header : request.getHeaders()) {
             String name = header.getName().toLowerCase();
-            if (name.equals("date") || name.startsWith("x-")) {
+            if (name.equals("date") || name.startsWith("x-api-")) {
                 output.add(String.format("%s:%s", name, header.getValue().trim()));
             }
         }
@@ -138,15 +135,30 @@ public class HttpClient {
         output.sort(String::compareTo);
         output.add(0, String.format("%s %s", request.getMethod(), request.getPath()));
 
+        if (rawData != null) {
+            String content = jackson.writeValueAsString(rawData);
+            request.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Content-Length", content.length());
+
+            output.add("");
+            output.add(content);
+        }
+
         // TODO: payload
+        System.out.println(String.join("\n", output));
         request.setHeader("Authorization", String.format("APIKEY %s",
                 secret.hmacHex(String.join("\n", output))));
 
         return getClient().execute(server, request, new ResponseHandler());
     }
 
-    public void post(String path, Object body) {
-        //doRequest(new HttpPost(server, requestPath(path)));
+    public Object get(String path) throws IOException {
+        return doRequest(new HttpGet(requestPath(path)), null);
+    }
+
+    public Object post(String path, Object data) throws IOException {
+        return doRequest(new HttpPost(requestPath(path)), data);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -2,9 +2,10 @@ package io.bluepipe.client.http;
 
 import org.junit.jupiter.api.Test;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HttpClientTest {
 
@@ -15,9 +16,11 @@ class HttpClientTest {
     private static final String testSecret = "yZz6XTYSaiyx5q2u";
 
     @Test
-    void shouldHttpClientWorksFine() throws MalformedURLException {
-        HttpClient client = new HttpClient(testAddress, testApiKey, testSecret);
-        System.out.println(client);
-        assertEquals(1, 1);
+    void shouldHttpClientWorksFine() throws IOException {
+        HttpClient client = new HttpClient("i.am.not.exists", testApiKey, testSecret);
+        HttpClient finalClient = client;
+        assertThrows(UnknownHostException.class, () -> finalClient.get("/hello?a=b#c2"));
+
+        client = new HttpClient(testAddress, testApiKey, testSecret);
     }
 }
