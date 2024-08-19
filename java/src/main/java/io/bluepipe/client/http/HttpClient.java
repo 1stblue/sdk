@@ -48,6 +48,10 @@ public class HttpClient {
 
     private final String prefix;
 
+    private final String apiKey;
+
+    private final HmacUtils secret;
+
     private final HttpClientConnectionManager connManager;
 
     private final RequestConfig requestConfig = RequestConfig.custom()
@@ -55,7 +59,7 @@ public class HttpClient {
             .setConnectionKeepAlive(TimeValue.ofSeconds(10))
             .build();
 
-    public HttpClient(String address) throws MalformedURLException {
+    public HttpClient(String address, String apiKey, String secret) throws MalformedURLException {
 
         this.connManager = new PoolingHttpClientConnectionManager();
 
@@ -72,6 +76,8 @@ public class HttpClient {
 
         this.server = new HttpHost(addr.getProtocol(), addr.getHost(), port);
         this.prefix = addr.getPath().replaceAll("/+$", "");
+        this.apiKey = apiKey.trim();
+        this.secret = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, secret.trim());
     }
 
     private static String packageVersion() {
@@ -109,11 +115,6 @@ public class HttpClient {
         return prefix + path;
     }
 
-    private String signature(List<String> message) {
-        return new HmacUtils(HmacAlgorithms.HMAC_SHA_1, "")
-                .hmacHex(String.join("\n", message));
-    }
-
     private Object doRequest(HttpUriRequestBase request) throws IOException {
         int pos = request.getPath().indexOf("/");
         if (pos > 0) {
@@ -123,7 +124,7 @@ public class HttpClient {
             request.setHeader("Host", defaultServerName);
         }
 
-        request.setHeader("X-Api-Key", "");
+        request.setHeader("X-Api-Key", apiKey);
         request.setHeader("X-Api-Nonce", "");
 
         List<String> output = new ArrayList<>();
@@ -138,7 +139,8 @@ public class HttpClient {
         output.add(0, String.format("%s %s", request.getMethod(), request.getPath()));
 
         // TODO: payload
-        request.setHeader("Authorization", String.format("APIKEY %s", signature(output)));
+        request.setHeader("Authorization", String.format("APIKEY %s",
+                secret.hmacHex(String.join("\n", output))));
 
         return getClient().execute(server, request, new ResponseHandler());
     }

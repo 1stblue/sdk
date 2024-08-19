@@ -10,9 +10,13 @@ class HttpClientTest {
 
     private static final String testAddress = "http://localhost/api/v1";
 
+    private static final String testApiKey = "etl";
+
+    private static final String testSecret = "yZz6XTYSaiyx5q2u";
+
     @Test
     void shouldHttpClientWorksFine() throws MalformedURLException {
-        HttpClient client = new HttpClient(testAddress);
+        HttpClient client = new HttpClient(testAddress, testApiKey, testSecret);
         System.out.println(client);
         assertEquals(1, 1);
     }
