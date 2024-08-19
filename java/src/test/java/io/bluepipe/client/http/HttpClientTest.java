@@ -22,5 +22,6 @@ class HttpClientTest {
         assertThrows(UnknownHostException.class, () -> finalClient.get("/hello?a=b#c2"));
 
         client = new HttpClient(testAddress, testApiKey, testSecret);
+        System.out.println(client.get("/connection/ping"));
     }
 }

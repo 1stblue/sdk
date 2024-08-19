@@ -145,8 +145,6 @@ public class HttpClient {
             output.add(content);
         }
 
-        // TODO: payload
-        System.out.println(String.join("\n", output));
         request.setHeader("Authorization", String.format("APIKEY %s",
                 secret.hmacHex(String.join("\n", output))));
 
@@ -181,6 +179,7 @@ public class HttpClient {
             }
 
             String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            System.out.println(content);
             jackson.readValue(content, this.getClass());
 
             return data;
