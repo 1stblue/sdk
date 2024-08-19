@@ -3,8 +3,11 @@ package io.bluepipe.client.http;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -12,9 +15,11 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
@@ -25,6 +30,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class HttpClient {
@@ -102,8 +109,12 @@ public class HttpClient {
         return prefix + path;
     }
 
-    private void doRequest(HttpUriRequestBase request) throws IOException {
+    private String signature(List<String> message) {
+        return new HmacUtils(HmacAlgorithms.HMAC_SHA_1, "")
+                .hmacHex(String.join("\n", message));
+    }
 
+    private Object doRequest(HttpUriRequestBase request) throws IOException {
         int pos = request.getPath().indexOf("/");
         if (pos > 0) {
             request.setHeader("Host", request.getPath().substring(0, pos));
@@ -112,17 +123,32 @@ public class HttpClient {
             request.setHeader("Host", defaultServerName);
         }
 
-        // TODO: auth
-        getClient().execute(server, request, new ResponseHandler());
+        request.setHeader("X-Api-Key", "");
+        request.setHeader("X-Api-Nonce", "");
+
+        List<String> output = new ArrayList<>();
+        for (Header header : request.getHeaders()) {
+            String name = header.getName().toLowerCase();
+            if (name.equals("date") || name.startsWith("x-")) {
+                output.add(String.format("%s:%s", name, header.getValue().trim()));
+            }
+        }
+
+        output.sort(String::compareTo);
+        output.add(0, String.format("%s %s", request.getMethod(), request.getPath()));
+
+        // TODO: payload
+        request.setHeader("Authorization", String.format("APIKEY %s", signature(output)));
+
+        return getClient().execute(server, request, new ResponseHandler());
     }
 
     public void post(String path, Object body) {
         //doRequest(new HttpPost(server, requestPath(path)));
-
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class ResponseHandler implements HttpClientResponseHandler<String> {
+    static class ResponseHandler implements HttpClientResponseHandler<Object> {
 
         @JsonProperty("success")
         private Boolean success;
@@ -131,15 +157,19 @@ public class HttpClient {
         private String message;
 
         @JsonProperty("data")
+        @JsonRawValue(value = true)
         private Object data;
 
         @Override
-        public String handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
+        public Object handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
             if (response.getCode() / 100 != 2) {
                 throw new HttpException("HttpResponse: %d", response.getCode());
             }
 
-            return "";
+            String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            jackson.readValue(content, this.getClass());
+
+            return data;
         }
     }
 
