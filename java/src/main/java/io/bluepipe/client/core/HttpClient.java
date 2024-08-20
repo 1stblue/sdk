@@ -1,4 +1,4 @@
-package io.bluepipe.client.http;
+package io.bluepipe.client.core;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -7,9 +7,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.classic.methods.*;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
@@ -40,11 +38,18 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpClient {
 
-    public static final String defaultServerName = "api.1stblue.com";
+    public static final String defaultServerName = "api.1stblue.cloud";
 
     private static final ObjectMapper jackson = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     private static final String userAgent = "1stblue.java/" + packageVersion();
+
+    private static final HttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+
+    private static final RequestConfig requestConfig = RequestConfig.custom()
+            .setConnectionRequestTimeout(5, TimeUnit.SECONDS)
+            .setConnectionKeepAlive(TimeValue.ofSeconds(10))
+            .build();
 
     private static final SecureRandom secureRandom = new SecureRandom();
 
@@ -58,17 +63,7 @@ public class HttpClient {
 
     private final HmacUtils secret;
 
-    private final HttpClientConnectionManager connManager;
-
-    private final RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectionRequestTimeout(5, TimeUnit.SECONDS)
-            .setConnectionKeepAlive(TimeValue.ofSeconds(10))
-            .build();
-
     public HttpClient(String address, String apiKey, String secret) throws MalformedURLException {
-
-        this.connManager = new PoolingHttpClientConnectionManager();
-
         address = address.trim();
         if (!address.contains("://")) {
             address = "https://" + address;
@@ -159,11 +154,22 @@ public class HttpClient {
         return doRequest(new HttpPost(requestPath(path)), data);
     }
 
+    public Object delete(String path) throws IOException {
+        return doRequest(new HttpDelete(requestPath(path)), null);
+    }
+
+    public Object put(String path, Object data) throws IOException {
+        return doRequest(new HttpPut(requestPath(path)), data);
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
-    static class ResponseHandler implements HttpClientResponseHandler<Object> {
+    static class ApiResponse {
 
         @JsonProperty("success")
         private Boolean success;
+
+        @JsonProperty(value = "code")
+        private int code;
 
         @JsonProperty("message")
         private String message;
@@ -172,17 +178,23 @@ public class HttpClient {
         @JsonRawValue(value = true)
         private Object data;
 
+    }
+
+    static class ResponseHandler implements HttpClientResponseHandler<Object> {
+
         @Override
         public Object handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
             if (response.getCode() / 100 != 2) {
-                throw new HttpException("HttpResponse: %d", response.getCode());
+                throw new HttpException("HttpException: %d", response.getCode());
             }
 
             String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            System.out.println(content);
-            jackson.readValue(content, this.getClass());
+            ApiResponse result = jackson.readValue(content, ApiResponse.class);
+            if (result.success) {
+                return result.data;
+            }
 
-            return data;
+            throw new RuntimeException(String.format("ResponseError: %s[%d]", result.message, result.code));
         }
     }
 
