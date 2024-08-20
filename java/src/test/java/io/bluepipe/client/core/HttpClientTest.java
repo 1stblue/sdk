@@ -30,5 +30,7 @@ class HttpClientTest {
         assertDoesNotThrow(() -> {
             client.get("/connection/ping");
         });
+
+        assertThrows(RuntimeException.class, () -> client.post("/i/am/404", null));
     }
 }
