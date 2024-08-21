@@ -1,6 +1,7 @@
 package io.bluepipe.client;
 
 import io.bluepipe.client.core.HttpClient;
+import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
 import io.bluepipe.client.model.Connection;
 import org.junit.jupiter.api.Test;
@@ -52,12 +53,10 @@ class ClientTest {
         client.delete(config);
         client.save(config);
 
-        config = client.loadConnection("mysql.dev");
+        config = client.getConnection("mysql.dev");
         assertNotNull(config);
 
-        // TODO: or throw exception?
-        config = client.loadConnection("i.am.not.exists");
-        assertNull(config);
+        assertThrows(ServiceException.class, () -> client.getConnection("i.am.not.exists"));
     }
 
     @Test

@@ -6,13 +6,12 @@ import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
 import io.bluepipe.client.model.Connection;
-import io.bluepipe.client.model.Entity;
 import io.bluepipe.client.model.CopyTask;
+import io.bluepipe.client.model.Entity;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public interface Client {
@@ -35,14 +34,22 @@ public interface Client {
      */
     void delete(Entity entity) throws Exception;
 
-    Connection loadConnection(String tnsName) throws Exception;
+    /**
+     * Load Connection Config from remote
+     *
+     * @param tnsName id of the connection config
+     * @return Connection
+     * @throws ServiceException   when
+     * @throws TransportException when
+     */
+    Connection getConnection(String tnsName) throws Exception;
 
     /**
-     * Submit copy task
+     * Submit copy task to run immediately
      *
-     * @return List of instances
+     * @return Instance
      */
-    List<Instance> submit(CopyTask task) throws Exception;
+    Instance submit(CopyTask task) throws Exception;
 
     Instance getInstance(String id) throws Exception;
 
@@ -86,17 +93,18 @@ public interface Client {
         }
 
         @Override
-        public List<Instance> submit(CopyTask task) throws Exception {
-            return Collections.emptyList();
+        public Instance submit(CopyTask task) throws Exception {
+            return null;
         }
 
         @Override
         public Instance getInstance(String id) throws Exception {
+            // TODO: load
             return new Instance(id, httpClient);
         }
 
         @Override
-        public Connection loadConnection(String tnsName) throws TransportException, ServiceException, IOException {
+        public Connection getConnection(String tnsName) throws TransportException, ServiceException, IOException {
             Object result = httpClient.get(String.format("/connection/%s", HttpClient.cleanURLPath(tnsName)));
             if (result == null) {
                 return null;

@@ -192,7 +192,7 @@ public class HttpClient {
         @Override
         public Object handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
             if (response.getCode() / 100 != 2) {
-                throw new TransportException(response.getCode(), response.getEntity().toString());
+                throw new TransportException(response.getEntity().toString(), response.getCode());
             }
 
             String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
@@ -201,7 +201,7 @@ public class HttpClient {
                 return result.data;
             }
 
-            throw new ServiceException(String.format("ResponseError: %s[%d]", result.message, result.code));
+            throw new ServiceException(result.message, result.code);
         }
     }
 
