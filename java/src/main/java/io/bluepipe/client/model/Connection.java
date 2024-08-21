@@ -30,7 +30,7 @@ public class Connection extends Config {
 
     static {
         schemeClassMapper.put(YDB, "com.firstblue.bluepipe.connector.ymatrix.YMatrixConnector");
-        schemeClassMapper.put(MYSQL, "com.firstblue.bluepipe.connector.mysql.MySqlConnector");
+        schemeClassMapper.put(MYSQL, "com.firstblue.bluepipe.connector.mysql.MySQLConnector");
         schemeClassMapper.put(ORACLE, "com.firstblue.bluepipe.connector.oracle.OracleConnector");
         schemeClassMapper.put(SQLSERVER, "com.firstblue.bluepipe.connector.sqlserver.SqlServerConnector");
         schemeClassMapper.put(KAFKA, "com.firstblue.bluepipe.connector.kafka.KafkaConnector");
