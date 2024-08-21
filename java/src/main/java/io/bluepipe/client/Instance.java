@@ -6,7 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bluepipe.client.core.HttpClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,25 +21,31 @@ public class Instance {
     private String id;
 
     public Instance() {
-
     }
 
     public Instance(String id, HttpClient httpClient) {
         this.httpClient = httpClient;
     }
 
-    private String reqPath(String command) {
-        return "";
+    private String actionPath(String command) {
+        List<String> paths = new ArrayList<>();
+        paths.add("instance");
+        paths.add(HttpClient.cleanURLPath(id));
+        if (null != command && !command.isEmpty()) {
+            paths.add(command);
+        }
+
+        return "/" + String.join("/", paths);
     }
 
     public void kill(String will) throws IOException {
         Map<String, String> params = new HashMap<>();
         params.put("message", will);
-        httpClient.post(String.format("/instance/%s/stop", HttpClient.cleanURLPath(id)), params);
+        httpClient.post(actionPath("stop"), params);
     }
 
-    public Object status() {
-
+    public Object status() throws IOException {
+        httpClient.get(actionPath(null));
         return null;
     }
 

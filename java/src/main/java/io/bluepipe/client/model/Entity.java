@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class Config {
+public abstract class Entity {
 
     @JsonProperty(value = "setting")
     @JsonAlias(value = {"properties"})

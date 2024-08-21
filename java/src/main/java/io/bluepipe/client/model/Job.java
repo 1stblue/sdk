@@ -3,7 +3,7 @@ package io.bluepipe.client.model;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Job extends Config {
+public class Job extends Entity {
 
     @JsonProperty(value = "id")
     private String id;

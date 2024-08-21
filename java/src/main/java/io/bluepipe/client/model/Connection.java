@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Connection extends Config {
+public class Connection extends Entity {
 
     // TODO: 参考连接器的 manifest (应该在 server 端做映射)
     public static final String MYSQL = "mysql";
