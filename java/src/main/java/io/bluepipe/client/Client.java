@@ -12,6 +12,7 @@ import io.bluepipe.client.model.Job;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public interface Client {
@@ -34,13 +35,18 @@ public interface Client {
      */
     void delete(Entity entity) throws Exception;
 
-    Instance getInstance(String id) throws Exception;
-
     Connection loadConnection(String tnsName) throws Exception;
 
-//    Job loadJob(String jobId) throws Exception;
+    /**
+     * Submit job
+     *
+     * @return List of instances
+     */
+    List<Instance> submit(Job job) throws Exception;
 
-    //  Instance loadInstance(String instanceId) throws Exception;
+    Instance getInstance(String id) throws Exception;
+
+//    Job loadJob(String jobId) throws Exception;
 
     class V1 implements Client {
 
@@ -77,6 +83,11 @@ public interface Client {
         @Override
         public void delete(Entity entity) throws Exception {
             httpClient.delete(requestPath(entity));
+        }
+
+        @Override
+        public List<Instance> submit(Job job) throws Exception {
+            return Collections.emptyList();
         }
 
         @Override

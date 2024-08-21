@@ -67,6 +67,7 @@ class ClientTest {
         assertNotNull(instance);
 
         instance.status();
+        instance.kill("test");
     }
 
     @Test
