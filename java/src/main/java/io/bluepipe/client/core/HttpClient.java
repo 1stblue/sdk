@@ -3,7 +3,6 @@ package io.bluepipe.client.core;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
@@ -81,6 +80,16 @@ public class HttpClient {
         this.secret = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, secret.trim());
     }
 
+    public static String cleanURLPath(String value) {
+        if (value != null) {
+            value = value.replaceAll("\\s+", "");
+            value = value.replaceAll("^/+", "");
+            value = value.replaceAll("/+$", "");
+        }
+
+        return value;
+    }
+
     private static String packageVersion() {
         String version = HttpClient.class.getPackage().getImplementationVersion();
         if (version == null) {
@@ -134,7 +143,6 @@ public class HttpClient {
             String content = jackson.writeValueAsString(rawData);
             request.setEntity(new StringEntity(content, StandardCharsets.UTF_8));
             request.setHeader("Content-Type", "application/json");
-            request.setHeader("Content-Length", content.length());
 
             output.add("");
             output.add(content);
@@ -175,7 +183,6 @@ public class HttpClient {
         private String message;
 
         @JsonProperty("data")
-        @JsonRawValue(value = true)
         private Object data;
 
     }
@@ -185,7 +192,7 @@ public class HttpClient {
         @Override
         public Object handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
             if (response.getCode() / 100 != 2) {
-                throw new ServiceException(String.format("ResponseError: [%d]", response.getCode()));
+                throw new TransportException(response.getCode(), response.getEntity().toString());
             }
 
             String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
