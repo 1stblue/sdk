@@ -60,4 +60,9 @@ class ClientTest {
         assertNull(config);
     }
 
+    @Test
+    void shouldAAWorksFine() throws Exception {
+        Client client = Client.create(testAddress, testApiKey, testSecret);
+    }
+
 }

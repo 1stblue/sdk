@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
+import io.bluepipe.client.model.Config;
 import io.bluepipe.client.model.Connection;
-import io.bluepipe.client.model.Entity;
+import io.bluepipe.client.model.Job;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,14 +25,14 @@ public interface Client {
      *
      * @param entity Entity to be saved
      */
-    void save(Entity entity) throws Exception;
+    void save(Config entity) throws Exception;
 
     /**
      * Delete an entity
      *
      * @param entity Entity to be deleted
      */
-    void delete(Entity entity) throws Exception;
+    void delete(Config entity) throws Exception;
 
     Connection loadConnection(String tnsName) throws Exception;
 
@@ -50,10 +51,12 @@ public interface Client {
             httpClient = new HttpClient(address, apiKey, secret);
         }
 
-        private String entityPath(Entity entity) {
+        private String requestPath(Config entity) {
             List<String> paths = new ArrayList<>();
             if (entity instanceof Connection) {
                 paths.add("connection");
+            } else if (entity instanceof Job) {
+                paths.add("job");
             }
 
             String suffix = entity.getID();
@@ -65,13 +68,13 @@ public interface Client {
         }
 
         @Override
-        public void save(Entity entity) throws Exception {
-            httpClient.post(entityPath(entity), entity);
+        public void save(Config entity) throws Exception {
+            httpClient.post(requestPath(entity), entity);
         }
 
         @Override
-        public void delete(Entity entity) throws Exception {
-            httpClient.delete(entityPath(entity));
+        public void delete(Config entity) throws Exception {
+            httpClient.delete(requestPath(entity));
         }
 
         @Override

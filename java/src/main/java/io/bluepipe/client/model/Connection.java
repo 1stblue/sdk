@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Connection extends Entity {
+public class Connection extends Config {
 
-    // TODO: 参考连接器的 manifest，应该在 server 端做映射
+    // TODO: 参考连接器的 manifest (应该在 server 端做映射)
     public static final String MYSQL = "mysql";
     public static final String POSTGRESQL = "postgresql";
     public static final String ORACLE = "oracle";
@@ -71,25 +71,7 @@ public class Connection extends Entity {
     }
 
     public Connection(@NotNull String address, @NotNull String scheme) {
-
-        int pos = address.indexOf("://");
-        if (pos > 0) {
-            if (scheme.isEmpty()) {
-                // jdbc:mysql://
-                scheme = address.substring(0, pos);
-                scheme = scheme.substring(1 + scheme.lastIndexOf(":"));
-            }
-            address = address.substring(pos + 3);
-        }
-
-        pos = address.indexOf("@");
-        if (pos > 0) {
-            // TODO: password
-            address = address.substring(pos + 1);
-        }
-
-        this.scheme = scheme;
-        this.className = schemeClassMapper.get(scheme);
+        setScheme(scheme);
         setAddress(address, 0);
     }
 
@@ -102,6 +84,11 @@ public class Connection extends Entity {
         }
 
         return value;
+    }
+
+    private void setScheme(String scheme) {
+        this.scheme = scheme;
+        this.className = schemeClassMapper.get(scheme);
     }
 
     public void setId(@NotNull String tnsName) {
@@ -122,6 +109,22 @@ public class Connection extends Entity {
     }
 
     public void setAddress(@NotNull String address, int poolSize) {
+        int pos = address.indexOf("://");
+        if (pos > 0) {
+            if (scheme.isEmpty()) {
+                String scheme = address.substring(0, pos);
+                setScheme(scheme.substring(1 + scheme.lastIndexOf(":")));
+                // jdbc:mysql://
+            }
+            address = address.substring(pos + 3);
+        }
+
+        pos = address.indexOf("@");
+        if (pos > 0) {
+            // TODO: password
+            address = address.substring(pos + 1);
+        }
+
         this.servers = new ArrayList<>();
         for (String each : address.split(",")) {
             each = each.trim();
@@ -129,7 +132,7 @@ public class Connection extends Entity {
                 continue;
             }
 
-            int pos = each.indexOf("/");
+            pos = each.indexOf("/");
             if (pos > 0) {
                 setNamespace(leftUntil(each.substring(pos + 1), "?", "#"));
                 each = each.substring(0, pos);
