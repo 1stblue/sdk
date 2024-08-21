@@ -3,10 +3,20 @@ package io.bluepipe.client.model;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Job extends Entity {
+public class CopyTask extends Entity {
+
+    // rightNow
+    // crontab
+    // cdc
 
     @JsonProperty(value = "id")
     private String id;
+
+    @JsonProperty(value = "source")
+    private String sourceTns;
+
+    @JsonProperty(value = "target")
+    private String targetTns;
 
     /**
      * <ul>在同一个沙箱内:
@@ -21,6 +31,20 @@ public class Job extends Entity {
     @Override
     public String getID() {
         return this.id;
+    }
+
+    /**
+     * create table if not exist
+     */
+    public void enableCreateTable(boolean yes) {
+
+    }
+
+    /**
+     * alter table if not match
+     */
+    public void enableModifyTable(boolean yes) {
+
     }
 
 }

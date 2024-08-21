@@ -7,7 +7,7 @@ import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
 import io.bluepipe.client.model.Connection;
 import io.bluepipe.client.model.Entity;
-import io.bluepipe.client.model.Job;
+import io.bluepipe.client.model.CopyTask;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -38,11 +38,11 @@ public interface Client {
     Connection loadConnection(String tnsName) throws Exception;
 
     /**
-     * Submit job
+     * Submit copy task
      *
      * @return List of instances
      */
-    List<Instance> submit(Job job) throws Exception;
+    List<Instance> submit(CopyTask task) throws Exception;
 
     Instance getInstance(String id) throws Exception;
 
@@ -63,7 +63,7 @@ public interface Client {
             List<String> paths = new ArrayList<>();
             if (entity instanceof Connection) {
                 paths.add("connection");
-            } else if (entity instanceof Job) {
+            } else if (entity instanceof CopyTask) {
                 paths.add("job");
             }
 
@@ -86,7 +86,7 @@ public interface Client {
         }
 
         @Override
-        public List<Instance> submit(Job job) throws Exception {
+        public List<Instance> submit(CopyTask task) throws Exception {
             return Collections.emptyList();
         }
 
