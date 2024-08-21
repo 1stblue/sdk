@@ -61,6 +61,15 @@ class ClientTest {
     }
 
     @Test
+    void shouldInstanceStatusWorksFine() throws Exception {
+        Client client = Client.create(testAddress, testApiKey, testSecret);
+        Instance instance = client.getInstance("b7696e0b-30fa-46e0-87cd-03275db28a65");
+        assertNotNull(instance);
+
+        instance.status();
+    }
+
+    @Test
     void shouldAAWorksFine() throws Exception {
         Client client = Client.create(testAddress, testApiKey, testSecret);
     }

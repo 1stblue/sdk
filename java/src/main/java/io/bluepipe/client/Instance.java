@@ -21,9 +21,11 @@ public class Instance {
     private String id;
 
     public Instance() {
+        this("", null);
     }
 
     public Instance(String id, HttpClient httpClient) {
+        this.id = id;
         this.httpClient = httpClient;
     }
 
@@ -45,7 +47,8 @@ public class Instance {
     }
 
     public Object status() throws IOException {
-        httpClient.get(actionPath(null));
+        Object result = httpClient.get(actionPath(null));
+        System.out.println(result);
         return null;
     }
 

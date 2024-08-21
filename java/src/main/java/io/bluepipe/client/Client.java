@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
-import io.bluepipe.client.model.Entity;
 import io.bluepipe.client.model.Connection;
+import io.bluepipe.client.model.Entity;
 import io.bluepipe.client.model.Job;
 
 import java.io.IOException;
@@ -33,6 +33,8 @@ public interface Client {
      * @param entity Entity to be deleted
      */
     void delete(Entity entity) throws Exception;
+
+    Instance getInstance(String id) throws Exception;
 
     Connection loadConnection(String tnsName) throws Exception;
 
@@ -75,6 +77,11 @@ public interface Client {
         @Override
         public void delete(Entity entity) throws Exception {
             httpClient.delete(requestPath(entity));
+        }
+
+        @Override
+        public Instance getInstance(String id) throws Exception {
+            return new Instance(id, httpClient);
         }
 
         @Override
