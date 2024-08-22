@@ -36,6 +36,7 @@ public class Connection extends Entity {
         schemeClassMapper.put(KAFKA, "com.firstblue.bluepipe.connector.kafka.KafkaConnector");
         schemeClassMapper.put(MONGODB, "com.firstblue.bluepipe.connector.mongodb.MongoDBConnector");
         schemeClassMapper.put(POSTGRESQL, "com.firstblue.bluepipe.connector.postgresql.PostgreSQLConnector");
+        schemeClassMapper.put("postgres", "com.firstblue.bluepipe.connector.postgresql.PostgreSQLConnector");
     }
 
     @JsonProperty(value = "tns_name")

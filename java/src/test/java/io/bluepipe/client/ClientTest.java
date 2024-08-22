@@ -43,7 +43,7 @@ class ClientTest {
 
         Client client = Client.create(testAddress, testApiKey, testSecret);
 
-        Connection config = new Connection("jdbc:mysql://root@demo-mysql:3306/mysql", Connection.MYSQL, 12);
+        Connection config = new Connection("jdbc:mysql://demo-mysql:3306/mysql", Connection.MYSQL, 12);
 
         // 强制设置 ID
         config.setId("mysql.dev");
@@ -51,11 +51,19 @@ class ClientTest {
         config.setUserInfo("root", "123456");
         config.setProperty("key1", "value1");
 
-        client.delete(config);
+        //client.delete(config);
         client.save(config);
 
         config = client.getConnection("mysql.dev");
         assertNotNull(config);
+
+        config = new Connection("postgresql://demo-postgres:5432/postgres",
+                "", 20);
+        config.setId("ydb.dev");
+        config.setTitle("测试PG");
+        config.setUserInfo("postgres", "123456");
+        //client.delete(config);
+        client.save(config);
 
         assertThrows(ServiceException.class, () -> client.getConnection("i.am.not.exists"));
     }
