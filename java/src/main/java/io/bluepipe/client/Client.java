@@ -101,7 +101,8 @@ public interface Client {
 
         @Override
         public List<Instance> submit(CopyTask entity, Context context) throws Exception {
-            httpClient.post(requestPath(entity), entity);
+            Object result = httpClient.post(requestPath(entity), entity);
+            System.out.println(result);
             return null;
         }
 

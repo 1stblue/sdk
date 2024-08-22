@@ -2,7 +2,7 @@ package io.bluepipe.client;
 
 import java.util.HashMap;
 
-public class Context extends HashMap<String, String> {
+public class Context extends HashMap<String, Object> {
 
     private static final String keyAutoCreateTable = "auto.create.table";
     private static final String keyAutoModifyTable = "auto.alter.table";
@@ -21,7 +21,7 @@ public class Context extends HashMap<String, String> {
     }
 
     @Override
-    public String put(String key, String value) {
+    public Object put(String key, Object value) {
         if (null != key) {
             super.put(key.replaceAll("\\s+", "").toLowerCase(), value);
         }
@@ -48,7 +48,7 @@ public class Context extends HashMap<String, String> {
      * @param enabled true or false; default true
      */
     public void autoCreateTable(boolean enabled) {
-        put(keyAutoCreateTable, Boolean.toString(enabled));
+        put(keyAutoCreateTable, enabled);
     }
 
     /**
@@ -57,7 +57,7 @@ public class Context extends HashMap<String, String> {
      * @param enabled true or false; default false
      */
     public void autoModifyTable(boolean enabled) {
-        put(keyAutoModifyTable, Boolean.toString(enabled));
+        put(keyAutoModifyTable, enabled);
     }
 
     /**
@@ -99,7 +99,7 @@ public class Context extends HashMap<String, String> {
      * @since >= 2.0
      */
     public void ignoreDeleteStatement(boolean ignore) {
-        put("ignore.delete.statement", Boolean.toString(ignore));
+        put("ignore.delete.statement", ignore);
     }
 
 }

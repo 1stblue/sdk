@@ -12,11 +12,11 @@ public abstract class Entity {
 
     @JsonProperty(value = "setting")
     @JsonAlias(value = {"properties"})
-    protected Map<String, String> properties = new HashMap<>();
+    protected Map<String, Object> properties = new HashMap<>();
 
     public abstract String getID();
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         if (properties != null) {
             if (this.properties == null) {
                 this.properties = new HashMap<>();
@@ -25,7 +25,7 @@ public abstract class Entity {
         }
     }
 
-    public void setProperty(String key, String value) {
+    public void setProperty(String key, Object value) {
         if (this.properties == null) {
             this.properties = new HashMap<>();
         }

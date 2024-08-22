@@ -88,6 +88,7 @@ class ClientTest {
                 .source("mysql.dev", "tpch", "*")
                 .target("ydb.dev", "tpch_test", "v1_{table}")
                 .fields("*", "{field}")
+                .defaultOptions(Context.Default())
                 .build();
 
         Client client = Client.create(testAddress, testApiKey, testSecret);

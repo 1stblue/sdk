@@ -145,8 +145,7 @@ public class CopyTask extends Entity {
             return this;
         }
 
-        @Deprecated
-        private Builder context(Context context) {
+        public Builder defaultOptions(Context context) {
             if (null != context) {
                 for (String key : context.keySet()) {
                     output.setProperty(key, context.get(key));
