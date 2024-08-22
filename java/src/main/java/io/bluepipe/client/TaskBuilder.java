@@ -2,12 +2,11 @@ package io.bluepipe.client;
 
 import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.model.CopyTask;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 public class TaskBuilder {
-
-    private static final String keyAutoCreateTable = "auto.create.table";
-    private static final String keyAutoModifyTable = "auto.alter.table";
-    private static final String keyTaskSandbox = "job_guid";
 
     /**
      * output CopyTask
@@ -27,32 +26,42 @@ public class TaskBuilder {
         return new TaskBuilder(id);
     }
 
-    public TaskBuilder source() {
+    public TaskBuilder source(@NotNull String tnsName, @NotNull String schemaName, String tableName, Map<String, String> partition) {
+        CopyTask.Bucket bucket = new CopyTask.Bucket();
         return this;
     }
 
-    public TaskBuilder target() {
+    public TaskBuilder source(@NotNull String tnsName, @NotNull String schemaName, String tableName) {
+        return source(tnsName, schemaName, tableName, null);
+    }
+
+    public TaskBuilder source(@NotNull String tnsName, @NotNull String schemaName) {
+        return source(tnsName, schemaName, "*");
+    }
+
+    public TaskBuilder target(@NotNull String tnsName, String schemaName, String tableName, Map<String, String> partition) {
         return this;
     }
 
-    /**
-     * <ul>在同一个沙箱内:
-     * <li>做批流融合</li>
-     * <li>一对 pair 只起一条 log based replication 链路</li>
-     * </ul>
-     */
-    public TaskBuilder sandbox(String sandbox) {
-        output.setProperty(keyTaskSandbox, sandbox);
+    public TaskBuilder target(@NotNull String tnsName, String schemaName, String tableName) {
+        return target(tnsName, schemaName, tableName, null);
+    }
+
+    public TaskBuilder target(@NotNull String tnsName) {
+        return target(tnsName, "{schema}", "{table}", null);
+    }
+
+    public TaskBuilder fields() {
         return this;
     }
 
-    public TaskBuilder autoCreateTable(boolean yes) {
-        output.setProperty(keyAutoCreateTable, Boolean.toString(yes));
-        return this;
-    }
+    public TaskBuilder context(Context context) {
+        if (null != context) {
+            for (String key : context.keySet()) {
+                output.setProperty(key, context.get(key));
+            }
+        }
 
-    public TaskBuilder autoModifyTable(boolean yes) {
-        output.setProperty(keyAutoModifyTable, Boolean.toString(yes));
         return this;
     }
 

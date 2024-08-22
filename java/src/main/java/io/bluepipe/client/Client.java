@@ -57,7 +57,7 @@ public interface Client {
      *
      * @return List of Instance
      */
-    List<Instance> submit(CopyTask task) throws Exception;
+    List<Instance> submit(CopyTask task, Context context) throws Exception;
 
     Instance getInstance(String id) throws Exception;
 
@@ -100,7 +100,7 @@ public interface Client {
         }
 
         @Override
-        public List<Instance> submit(CopyTask task) throws Exception {
+        public List<Instance> submit(CopyTask task, Context context) throws Exception {
             return null;
         }
 

@@ -72,18 +72,21 @@ class ClientTest {
 
     @Test
     void shouldCopyTaskAPIWorksFine() throws Exception {
-
+        /* 老版本：
+         * 1. Save -> Run;
+         * 2. Job ID
+         */
         CopyTask config = TaskBuilder.create("rule.1234")
-                .source()
-                .target()
-                .autoCreateTable(true)
-                .autoModifyTable(false)
-                .sandbox("job_abcd")
+                .source("mysql.dev", "tpch", "*")
+                .target("ydb.dev", "tpch_test", "v1_{table}")
+                .fields()
+                .context(Context.Default())
                 .build();
         System.out.println(config.toString());
 
         Client client = Client.create(testAddress, testApiKey, testSecret);
-        client.save(config);
+        //client.save(config);
+        client.submit(config, null);
     }
 
 }
