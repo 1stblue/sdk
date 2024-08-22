@@ -78,7 +78,7 @@ public interface Client {
             if (entity instanceof Connection) {
                 paths.add("connection");
             } else if (entity instanceof CopyTask) {
-                paths.add("job");
+                paths.add("next/task");
             }
 
             String suffix = entity.getID();
@@ -123,7 +123,7 @@ public interface Client {
 
         @Override
         public CopyTask getCopyTask(String taskId) throws Exception {
-            Object result = httpClient.get(String.format("/job/%s/rule", HttpClient.cleanURLPath(taskId)));
+            Object result = httpClient.get(String.format("/next/task/%s", HttpClient.cleanURLPath(taskId)));
             return null;
         }
 
