@@ -4,6 +4,7 @@ import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
 import io.bluepipe.client.model.Connection;
+import io.bluepipe.client.model.CopyTask;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -38,15 +39,15 @@ class ClientTest {
     }
 
     @Test
-    void shouldConnectionCRUDWorksFine() throws Exception {
+    void shouldConnectionAPIWorksFine() throws Exception {
 
         Client client = Client.create(testAddress, testApiKey, testSecret);
 
-        Connection config = new Connection("jdbc:mysql://root@demo-mysql:3306/mysql", Connection.MYSQL);
+        Connection config = new Connection("jdbc:mysql://root@demo-mysql:3306/mysql", Connection.MYSQL, 12);
 
         // 强制设置 ID
         config.setId("mysql.dev");
-        config.setTitle("测试啦啦 ");
+        config.setTitle(" 测试啦啦 ");
         config.setUserInfo("root", "123456");
         config.setProperty("key1", "value1");
 
@@ -70,7 +71,11 @@ class ClientTest {
     }
 
     @Test
-    void shouldAAWorksFine() throws Exception {
+    void shouldCopyTaskAPIWorksFine() throws Exception {
+
+        CopyTask config = TaskBuilder.create()
+                .build();
+
         Client client = Client.create(testAddress, testApiKey, testSecret);
     }
 

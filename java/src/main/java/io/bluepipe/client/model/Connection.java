@@ -71,8 +71,12 @@ public class Connection extends Entity {
     }
 
     public Connection(@NotNull String address, @NotNull String scheme) {
+        this(address, scheme, 0);
+    }
+
+    public Connection(@NotNull String address, @NotNull String scheme, int poolSize) {
         setScheme(scheme);
-        setAddress(address, 0);
+        setAddress(address, poolSize);
     }
 
     private static String leftUntil(String value, String... search) {

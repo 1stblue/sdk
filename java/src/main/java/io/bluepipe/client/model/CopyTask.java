@@ -8,7 +8,6 @@ public class CopyTask extends Entity {
     // rightNow
     // crontab
     // cdc
-
     @JsonProperty(value = "id")
     private String id;
 
@@ -32,19 +31,4 @@ public class CopyTask extends Entity {
     public String getID() {
         return this.id;
     }
-
-    /**
-     * create table if not exist
-     */
-    public void enableCreateTable(boolean yes) {
-
-    }
-
-    /**
-     * alter table if not match
-     */
-    public void enableModifyTable(boolean yes) {
-
-    }
-
 }
