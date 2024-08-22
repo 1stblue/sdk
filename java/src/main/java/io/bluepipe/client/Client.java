@@ -53,11 +53,11 @@ public interface Client {
     CopyTask getCopyTask(String taskId) throws Exception;
 
     /**
-     * Submit copy task to run immediately
+     * Submit copy entity to run immediately
      *
      * @return List of Instance
      */
-    List<Instance> submit(CopyTask task, Context context) throws Exception;
+    List<Instance> submit(CopyTask entity, Context context) throws Exception;
 
     Instance getInstance(String id) throws Exception;
 
@@ -100,7 +100,8 @@ public interface Client {
         }
 
         @Override
-        public List<Instance> submit(CopyTask task, Context context) throws Exception {
+        public List<Instance> submit(CopyTask entity, Context context) throws Exception {
+            httpClient.post(requestPath(entity), entity);
             return null;
         }
 

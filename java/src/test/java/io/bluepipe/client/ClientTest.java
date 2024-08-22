@@ -76,17 +76,15 @@ class ClientTest {
          * 1. Save -> Run;
          * 2. Job ID
          */
-        CopyTask config = TaskBuilder.create("rule.1234")
+        CopyTask config = CopyTask.Builder.create("rule.1234")
                 .source("mysql.dev", "tpch", "*")
                 .target("ydb.dev", "tpch_test", "v1_{table}")
-                .fields()
-                .context(Context.Default())
+                .fields("*", "{field}")
                 .build();
-        System.out.println(config.toString());
 
         Client client = Client.create(testAddress, testApiKey, testSecret);
         //client.save(config);
-        client.submit(config, null);
+        client.submit(config, Context.Default());
     }
 
 }
