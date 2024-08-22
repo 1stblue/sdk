@@ -73,10 +73,17 @@ class ClientTest {
     @Test
     void shouldCopyTaskAPIWorksFine() throws Exception {
 
-        CopyTask config = TaskBuilder.create()
+        CopyTask config = TaskBuilder.create("rule.1234")
+                .source()
+                .target()
+                .autoCreateTable(true)
+                .autoModifyTable(false)
+                .sandbox("job_abcd")
                 .build();
+        System.out.println(config.toString());
 
         Client client = Client.create(testAddress, testApiKey, testSecret);
+        client.save(config);
     }
 
 }

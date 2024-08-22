@@ -1,7 +1,8 @@
 package io.bluepipe.client.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.bluepipe.client.core.HttpClient;
+import org.jetbrains.annotations.NotNull;
 
 public class CopyTask extends Entity {
 
@@ -9,7 +10,7 @@ public class CopyTask extends Entity {
     // crontab
     // cdc
     @JsonProperty(value = "id")
-    private String id;
+    private String ruleId;
 
     @JsonProperty(value = "source")
     private String sourceTns;
@@ -17,18 +18,17 @@ public class CopyTask extends Entity {
     @JsonProperty(value = "target")
     private String targetTns;
 
-    /**
-     * <ul>在同一个沙箱内:
-     * <li>做批流融合</li>
-     * <li>一对 pair 只起一条 log based replication 链路</li>
-     * </ul>
-     */
-    @JsonProperty(value = "sandbox")
-    @JsonAlias(value = {"namespace"})
-    private String sandbox;
-
     @Override
     public String getID() {
-        return this.id;
+        return this.ruleId;
     }
+
+    public void setID(@NotNull String id) {
+        this.ruleId = HttpClient.cleanURLPath(id);
+    }
+
+    public CopyTask() {
+
+    }
+
 }

@@ -45,11 +45,19 @@ public interface Client {
     Connection getConnection(String tnsName) throws Exception;
 
     /**
+     * Load CopyTask Configuration from remote
+     *
+     * @param taskId id of the task config
+     * @return CopyTask
+     */
+    CopyTask getCopyTask(String taskId) throws Exception;
+
+    /**
      * Submit copy task to run immediately
      *
-     * @return Instance
+     * @return List of Instance
      */
-    Instance submit(CopyTask task) throws Exception;
+    List<Instance> submit(CopyTask task) throws Exception;
 
     Instance getInstance(String id) throws Exception;
 
@@ -57,8 +65,7 @@ public interface Client {
 
     class V1 implements Client {
 
-        private static final ObjectMapper jackson = new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        private static final ObjectMapper jackson = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         private final HttpClient httpClient;
 
@@ -93,7 +100,7 @@ public interface Client {
         }
 
         @Override
-        public Instance submit(CopyTask task) throws Exception {
+        public List<Instance> submit(CopyTask task) throws Exception {
             return null;
         }
 
@@ -111,6 +118,12 @@ public interface Client {
             }
 
             return jackson.convertValue(result, Connection.class);
+        }
+
+        @Override
+        public CopyTask getCopyTask(String taskId) throws Exception {
+            Object result = httpClient.get(String.format("/job/%s/rule", HttpClient.cleanURLPath(taskId)));
+            return null;
         }
 
     }

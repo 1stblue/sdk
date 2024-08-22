@@ -67,7 +67,10 @@ public class Connection extends Entity {
     @JsonProperty(value = "auth_config")
     private Map<String, String> authConfig = new HashMap<>();
 
-    public Connection() {
+    /**
+     * for json deserialize
+     */
+    private Connection() {
     }
 
     public Connection(@NotNull String address, @NotNull String scheme) {

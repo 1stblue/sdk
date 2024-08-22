@@ -1,8 +1,10 @@
 package io.bluepipe.client.core;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
@@ -174,12 +176,14 @@ public class HttpClient {
     static class ApiResponse {
 
         @JsonProperty("success")
-        private Boolean success;
+        private boolean success;
 
         @JsonProperty(value = "code")
+        @JsonAlias(value = {"status"})  // spring
         private int code;
 
         @JsonProperty("message")
+        @JsonAlias(value = {"error"})   // spring
         private String message;
 
         @JsonProperty("data")
@@ -191,17 +195,27 @@ public class HttpClient {
 
         @Override
         public Object handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
-            if (response.getCode() / 100 != 2) {
-                throw new TransportException(response.getEntity().toString(), response.getCode());
-            }
-
             String content = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            ApiResponse result = jackson.readValue(content, ApiResponse.class);
-            if (result.success) {
-                return result.data;
+            try {
+                ApiResponse result = jackson.readValue(content, ApiResponse.class);
+                if (result != null) {
+                    if (result.success) {
+                        return result.data;
+                    }
+
+                    if (response.getCode() / 100 == 2) {
+                        throw new ServiceException(result.message, result.code);
+                    }
+
+                    if (result.message != null && !result.message.isEmpty()) {
+                        content = result.message;
+                    }
+                }
+            } catch (JsonParseException ex) {
+                content = ex.getMessage();
             }
 
-            throw new ServiceException(result.message, result.code);
+            throw new TransportException(content, response.getCode());
         }
     }
 
