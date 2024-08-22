@@ -8,32 +8,27 @@ on:
       - v*
 
 jobs:
-  pre-release:
-    name: "Release"
+  release-java:
+    name: "Release Java"
+    strategy:
+      matrix:
+        version: [ '8', '11', '17', '21' ]
+
     runs-on: "ubuntu-latest"
 
     steps:
       - name: Check out
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Setup JDK
+        user: actions/setup-java@v4
         with:
-          python-version: 3.9
+          distribution: 'temurin'
+          java-version: ${{ matrix.version }}
 
-      - name: Install dependencies
+      - name: Maven Compile
+        working-directory: java
         run: |
-          python3 -m pip install --upgrade pip -r ./python/requirements.txt
-
-      - name: Release
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: "latest"
-          prerelease: false
-          title: ${{ github.ref_name }}
-          files: |
-            *.tar.gz
+          mvn clean package -DskipTests
