@@ -1,9 +1,9 @@
 package io.bluepipe.client.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import io.bluepipe.client.Context;
 import io.bluepipe.client.Instance;
+import io.bluepipe.client.core.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,36 +11,29 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Application extends Entity {
 
-    @JsonProperty(value = "id")
-    @JsonAlias(value = {"job_guid"})
-    private String id;
-
-    @JsonProperty(value = "title")
-    @JsonAlias(value = {"job_title"})
-    private String title;
-
     private Application() {
+        super(null);
     }
 
-    public Application(@NotNull String id, @NotNull String title) {
-        this.id = id;
-        setTitle(title);
+    public Application(@NotNull String name, @NotNull HttpClient client) {
+        super(name, client);
+        setOptions(Context.Default());
     }
 
     @Override
-    public String getID() {
-        return id;
+    protected String urlPath(String... action) {
+        return "/job" + super.urlPath(action);
     }
 
-    /**
-     * 设置应用标题
-     *
-     * @param title Title of the application
-     */
-    public void setTitle(String title) {
-        if (null != title) {
-            this.title = title.trim();
+    @Override
+    public Application save() throws Exception {
+        checkHttpClient();
+        Object result = httpClient.post(urlPath(), this);
+        if (null == result) {
+            return null;
         }
+
+        return (Application) covert(result, Application.class);
     }
 
     public void config(CopyTask config) {
@@ -67,6 +60,22 @@ public class Application extends Entity {
     @Deprecated
     public List<Instance> calibrate(String... table) {
         return null;
+    }
+
+    /**
+     * Start to schedule the application
+     *
+     * @param snapshot    copy or not
+     * @param incremental or not
+     */
+    public void start(boolean snapshot, boolean incremental) {
+    }
+
+    /**
+     * Stop to schedule the application
+     */
+    public void pause() {
+
     }
 
     /**

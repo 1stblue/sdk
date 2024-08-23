@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
+import io.bluepipe.client.model.Application;
 import io.bluepipe.client.model.Connection;
 import io.bluepipe.client.model.CopyTask;
 import io.bluepipe.client.model.Entity;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public interface Client {
      *
      * @param entity Entity to be saved
      */
-    void save(Entity entity) throws Exception;
+    Entity save(Entity entity) throws Exception;
 
     /**
      * Delete an entity
@@ -37,29 +37,28 @@ public interface Client {
     /**
      * Load Connection Config from remote
      *
-     * @param tnsName id of the connection config
+     * @param name ID of the connection
      * @return Connection
      * @throws ServiceException   when
      * @throws TransportException when
      */
-    Connection getConnection(String tnsName) throws Exception;
+    Connection getConnection(String name) throws Exception;
 
     /**
-     * Load CopyTask Configuration from remote
+     * Load Application from remote
      *
-     * @param taskId id of the task config
-     * @return CopyTask
+     * @param name ID of the application
+     * @return Application
      */
-    CopyTask getCopyTask(String taskId) throws Exception;
+    Application getApplication(String name) throws Exception;
 
     /**
      * Submit copy entity to run immediately
      *
      * @return List of Instance
      */
+    @Deprecated
     List<Instance> submit(CopyTask entity, Context context) throws Exception;
-
-    Instance getInstance(String id) throws Exception;
 
 //    Job loadJob(String jobId) throws Exception;
 
@@ -79,6 +78,8 @@ public interface Client {
                 paths.add("connection");
             } else if (entity instanceof CopyTask) {
                 paths.add("next/task");
+            } else if (entity instanceof Application) {
+                paths.add("job");
             }
 
             String suffix = entity.getID();
@@ -90,8 +91,9 @@ public interface Client {
         }
 
         @Override
-        public void save(Entity entity) throws Exception {
+        public Entity save(Entity entity) throws Exception {
             httpClient.post(requestPath(entity), entity);
+            return null;
         }
 
         @Override
@@ -107,14 +109,8 @@ public interface Client {
         }
 
         @Override
-        public Instance getInstance(String id) throws Exception {
-            // TODO: load
-            return new Instance(id, httpClient);
-        }
-
-        @Override
-        public Connection getConnection(String tnsName) throws TransportException, ServiceException, IOException {
-            Object result = httpClient.get(String.format("/connection/%s", HttpClient.cleanURLPath(tnsName)));
+        public Connection getConnection(String name) throws Exception {
+            Object result = httpClient.get(String.format("/connection/%s", HttpClient.cleanURLPath(name)));
             if (result == null) {
                 return null;
             }
@@ -123,9 +119,13 @@ public interface Client {
         }
 
         @Override
-        public CopyTask getCopyTask(String taskId) throws Exception {
-            Object result = httpClient.get(String.format("/next/task/%s", HttpClient.cleanURLPath(taskId)));
-            return null;
+        public Application getApplication(String name) throws Exception {
+            Object result = httpClient.get(String.format("/job/%s/config", HttpClient.cleanURLPath(name)));
+            if (result == null) {
+                return null;
+            }
+
+            return jackson.convertValue(result, Application.class);
         }
 
     }

@@ -39,14 +39,6 @@ public class Connection extends Entity {
         schemeClassMapper.put("postgres", "com.firstblue.bluepipe.connector.postgresql.PostgreSQLConnector");
     }
 
-    @JsonProperty(value = "tns_name")
-    @JsonAlias(value = {"id"})
-    private String id;
-
-    @JsonProperty(value = "tns_title")
-    @JsonAlias(value = {"title"})
-    private String title;
-
     @JsonProperty(value = "connector")
     @JsonAlias(value = {"scheme"})
     private String scheme;
@@ -72,13 +64,21 @@ public class Connection extends Entity {
      * for json deserialize
      */
     private Connection() {
+        super(null);
     }
 
+    public Connection(@NotNull String id, @NotNull HttpClient client) {
+        super(id, client);
+    }
+
+    @Deprecated
     public Connection(@NotNull String address, @NotNull String scheme) {
         this(address, scheme, 0);
     }
 
+    @Deprecated
     public Connection(@NotNull String address, @NotNull String scheme, int poolSize) {
+        super(null);
         setScheme(scheme);
         setAddress(address, poolSize);
     }
@@ -103,11 +103,6 @@ public class Connection extends Entity {
         this.id = HttpClient.cleanURLPath(tnsName);
     }
 
-    @Override
-    public String getID() {
-        return id;
-    }
-
     public void setTitle(@NotNull String title) {
         this.title = title.trim();
     }
@@ -119,7 +114,7 @@ public class Connection extends Entity {
     public void setAddress(@NotNull String address, int poolSize) {
         int pos = address.indexOf("://");
         if (pos > 0) {
-            if (scheme.isEmpty()) {
+            if (null == scheme || scheme.isEmpty()) {
                 String scheme = address.substring(0, pos);
                 setScheme(scheme.substring(1 + scheme.lastIndexOf(":")));
                 // jdbc:mysql://
@@ -159,6 +154,25 @@ public class Connection extends Entity {
             }
             this.servers.add(server);
         }
+    }
+
+    @Override
+    protected String urlPath(String... action) {
+        return "/connection" + super.urlPath(action);
+    }
+
+    /**
+     * Create or Update entity
+     */
+    @Override
+    public Connection save() throws Exception {
+        checkHttpClient();
+        Object result = httpClient.post(urlPath(), this);
+        if (null == result) {
+            return null;
+        }
+
+        return (Connection) covert(result, Connection.class);
     }
 
     public void setUserInfo(String username, String password) {

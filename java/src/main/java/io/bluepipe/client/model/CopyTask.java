@@ -26,11 +26,17 @@ public class CopyTask extends Entity {
 
     // for json deserialize
     private CopyTask() {
+        super(null);
     }
 
     @Override
     public String getID() {
         return this.taskId;
+    }
+
+    @Override
+    public Entity save() throws Exception {
+        return null;
     }
 
     public void setID(@NotNull String id) {
@@ -148,7 +154,7 @@ public class CopyTask extends Entity {
         public Builder defaultOptions(Context context) {
             if (null != context) {
                 for (String key : context.keySet()) {
-                    output.setProperty(key, context.get(key));
+                    output.setOption(key, context.get(key));
                 }
             }
 
