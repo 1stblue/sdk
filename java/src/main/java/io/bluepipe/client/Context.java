@@ -6,7 +6,6 @@ public class Context extends HashMap<String, Object> {
 
     private static final String keyAutoCreateTable = "auto.create.table";
     private static final String keyAutoModifyTable = "auto.alter.table";
-    private static final String keyTaskSandbox = "job_guid";
 
     public Context(boolean snapshot, boolean incremental) {
         this.scope(snapshot, incremental);
@@ -27,19 +26,6 @@ public class Context extends HashMap<String, Object> {
         }
 
         return value;
-    }
-
-    /**
-     * 在同一个沙箱内:
-     * <li>做批流融合</li>
-     * <li>一对 pair 只起一条 log based replication 链路</li>
-     *
-     * @param sandbox ID of the sandbox
-     * @param title   Title of the sandbox
-     * @since >= 2.0
-     */
-    public void sandbox(String sandbox, String title) {
-        put(keyTaskSandbox, sandbox);
     }
 
     /**
@@ -66,6 +52,7 @@ public class Context extends HashMap<String, Object> {
      * @param snapshot    复制全量
      * @param incremental 复制增量
      */
+    @Deprecated
     public void scope(boolean snapshot, boolean incremental) {
         if (incremental) {
             // TODO:

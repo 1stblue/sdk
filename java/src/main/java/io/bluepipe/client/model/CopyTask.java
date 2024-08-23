@@ -12,9 +12,6 @@ import java.util.Map;
 
 public class CopyTask extends Entity {
 
-    @JsonProperty(value = "id")
-    private String taskId;
-
     @JsonProperty(value = "source")
     private Bucket source;
 
@@ -27,20 +24,6 @@ public class CopyTask extends Entity {
     // for json deserialize
     private CopyTask() {
         super(null);
-    }
-
-    @Override
-    public String getID() {
-        return this.taskId;
-    }
-
-    @Override
-    public Entity save() throws Exception {
-        return null;
-    }
-
-    public void setID(@NotNull String id) {
-        this.taskId = HttpClient.cleanURLPath(id);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -91,19 +74,13 @@ public class CopyTask extends Entity {
          */
         private final CopyTask output;
 
-        private Builder(String taskId) {
+        private Builder() {
             output = new CopyTask();
-            output.setID(HttpClient.cleanURLPath(taskId));
         }
 
         public static Builder create() {
-            return new Builder("");
+            return new Builder();
         }
-
-        public static Builder create(String id) {
-            return new Builder(id);
-        }
-
 
         /**
          * Set Task Source

@@ -71,18 +71,6 @@ public class Connection extends Entity {
         super(id, client);
     }
 
-    @Deprecated
-    public Connection(@NotNull String address, @NotNull String scheme) {
-        this(address, scheme, 0);
-    }
-
-    @Deprecated
-    public Connection(@NotNull String address, @NotNull String scheme, int poolSize) {
-        super(null);
-        setScheme(scheme);
-        setAddress(address, poolSize);
-    }
-
     private static String leftUntil(String value, String... search) {
         for (String s : search) {
             int pos = value.indexOf(s);
@@ -97,14 +85,6 @@ public class Connection extends Entity {
     private void setScheme(String scheme) {
         this.scheme = scheme;
         this.className = schemeClassMapper.get(scheme);
-    }
-
-    public void setId(@NotNull String tnsName) {
-        this.id = HttpClient.cleanURLPath(tnsName);
-    }
-
-    public void setTitle(@NotNull String title) {
-        this.title = title.trim();
     }
 
     private void setNamespace(@NotNull String namespace) {
@@ -156,23 +136,16 @@ public class Connection extends Entity {
         }
     }
 
-    @Override
-    protected String urlPath(String... action) {
-        return "/connection" + super.urlPath(action);
-    }
-
     /**
      * Create or Update entity
      */
-    @Override
-    public Connection save() throws Exception {
+    public void save() throws Exception {
         checkHttpClient();
-        Object result = httpClient.post(urlPath(), this);
-        if (null == result) {
-            return null;
+        Object result = httpClient.post("/connection" + urlPath(), this);
+        if (null != result) {
+            Connection remote = jackson.convertValue(result, Connection.class);
+            this.id = remote.id;
         }
-
-        return (Connection) covert(result, Connection.class);
     }
 
     public void setUserInfo(String username, String password) {

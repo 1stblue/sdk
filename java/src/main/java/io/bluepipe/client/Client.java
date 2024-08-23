@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bluepipe.client.core.HttpClient;
 import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
-import io.bluepipe.client.model.Application;
-import io.bluepipe.client.model.Connection;
-import io.bluepipe.client.model.CopyTask;
-import io.bluepipe.client.model.Entity;
+import io.bluepipe.client.model.*;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;

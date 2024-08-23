@@ -2,7 +2,6 @@ package io.bluepipe.client.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.bluepipe.client.Context;
-import io.bluepipe.client.Instance;
 import io.bluepipe.client.core.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,34 +19,42 @@ public class Application extends Entity {
         setOptions(Context.Default());
     }
 
-    @Override
-    protected String urlPath(String... action) {
-        return "/job" + super.urlPath(action);
-    }
-
-    @Override
-    public Application save() throws Exception {
+    /**
+     * Attach CopyTask to current application
+     * 在同一个沙箱内:
+     * <li>做批流融合</li>
+     * <li>一对 pair 只起一条 log based replication 链路</li>
+     *
+     * @param config CopyTask configuration
+     * @since >= 2.0
+     */
+    public void attach(@NotNull CopyTask config) throws Exception {
         checkHttpClient();
-        Object result = httpClient.post(urlPath(), this);
-        if (null == result) {
-            return null;
+        if (null != id && !id.isEmpty()) {
+            Object result = httpClient.post("/job" + urlPath(), this);
+            if (result instanceof String) {
+                this.id = (String) result;
+            }
         }
 
-        return (Application) covert(result, Application.class);
-    }
-
-    public void config(CopyTask config) {
-    }
-
-    public void removeTask(CopyTask config) {
+        httpClient.post("/next/task" + urlPath(), config);
     }
 
     /**
-     * Query Struct Running Logs
+     * Remote CopyTask from current application
+     *
+     * @param config CopyTask configuration
+     */
+    public void detach(CopyTask config) throws Exception {
+        throw new RuntimeException("Not implemented yet");
+    }
+
+    /**
+     * Query Audit Logs
      *
      * @return List
      */
-    public List<Object> logs() {
+    public List<Object> auditLogs() throws Exception {
         throw new RuntimeException("Not implemented yet");
     }
 
@@ -59,7 +66,7 @@ public class Application extends Entity {
      */
     @Deprecated
     public List<Instance> calibrate(String... table) {
-        return null;
+        throw new RuntimeException("Not implemented yet");
     }
 
     /**
@@ -75,7 +82,6 @@ public class Application extends Entity {
      * Stop to schedule the application
      */
     public void pause() {
-
     }
 
     /**

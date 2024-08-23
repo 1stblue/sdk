@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bluepipe.client.core.HttpClient;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Entity {
 
-    private static final ObjectMapper jackson = new ObjectMapper()
+    protected static final ObjectMapper jackson = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     /**
@@ -52,10 +51,6 @@ public abstract class Entity {
             this.id = id.replaceAll("\\s+", "");
         }
         setHttpClient(client);
-    }
-
-    protected static Entity covert(Object entity, Class<? extends Entity> clazz) {
-        return jackson.convertValue(entity, clazz);
     }
 
     public String getID() {
@@ -107,8 +102,6 @@ public abstract class Entity {
         }
         this.properties.put(key, value);
     }
-
-    public abstract Entity save() throws Exception;
 
     /**
      * Delete entity

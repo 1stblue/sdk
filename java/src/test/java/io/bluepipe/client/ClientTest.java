@@ -1,7 +1,6 @@
 package io.bluepipe.client;
 
 import io.bluepipe.client.core.HttpClient;
-import io.bluepipe.client.core.ServiceException;
 import io.bluepipe.client.core.TransportException;
 import io.bluepipe.client.model.Application;
 import io.bluepipe.client.model.Connection;
@@ -12,7 +11,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ClientTest {
 
@@ -75,31 +75,20 @@ class ClientTest {
 
         final HttpClient client = new HttpClient(testAddress, testApiKey, testSecret);
 
-        Application app = new Application("demo-app", client);
-        app.setTitle("测试 SDK");
-
-        app.save();
-        app.pause();
-        System.out.println(app);
-    }
-
-    @Test
-    void shouldCopyTaskAPIWorksFine() throws Exception {
-        /* 老版本：
-         * 1. Save -> Run;
-         * 2. Job ID
-         */
-        CopyTask config = CopyTask.Builder.create("rule.1234")
+        CopyTask config = CopyTask.Builder.create()
                 .source("mysql.dev", "tpch", "*")
                 .target("ydb.dev", "tpch_test", "v1_{table}")
                 .fields("*", "{field}")
                 .defaultOptions(Context.Default())
                 .build();
 
-        Client client = Client.create(testAddress, testApiKey, testSecret);
-        //client.save(config);
-        client.submit(config, Context.Default());
+        Application app = new Application("demo-app", client);
+        app.setTitle("测试 SDK");
 
+        app.attach(config);
+
+        app.pause();
+        System.out.println(app);
     }
-
+    
 }
