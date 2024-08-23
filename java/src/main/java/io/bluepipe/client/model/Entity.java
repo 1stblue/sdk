@@ -22,69 +22,7 @@ public abstract class Entity {
     @JsonAlias(value = {"properties", "options"})
     protected Map<String, Object> properties = new HashMap<>();
 
-    /**
-     * 实体 ID
-     */
-    @JsonProperty(value = "id")
-    @JsonAlias(value = {"tns_name", "job_guid"})
-    protected String id;
-
-    /**
-     * 实体描述
-     */
-    @JsonProperty(value = "title")
-    @JsonAlias(value = {"tns_title"})
-    protected String title;
-
-    @JsonIgnore
-    protected transient HttpClient httpClient;
-
-    private Entity() {
-    }
-
-    protected Entity(HttpClient httpClient) {
-        this("", httpClient);
-    }
-
-    protected Entity(String id, HttpClient client) {
-        if (null != id) {
-            this.id = id.replaceAll("\\s+", "");
-        }
-        setHttpClient(client);
-    }
-
-    public String getID() {
-        return id;
-    }
-
-    public void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
-    public void setTitle(String title) {
-        if (null != title) {
-            this.title = title.trim();
-        }
-    }
-
-    protected String urlPath(String... action) {
-        List<String> output = new ArrayList<>();
-        if (null == id || id.isEmpty()) {
-            return "";
-        }
-
-        output.add(HttpClient.cleanURLPath(id));
-        for (String each : action) {
-            output.add(HttpClient.cleanURLPath(each));
-        }
-
-        return "/" + String.join("/", output);
-    }
-
-    protected void checkHttpClient() {
-        if (null == httpClient) {
-            throw new RuntimeException("http client not set");
-        }
+    protected Entity() {
     }
 
     public void setOptions(Map<String, Object> properties) {
@@ -101,14 +39,5 @@ public abstract class Entity {
             this.properties = new HashMap<>();
         }
         this.properties.put(key, value);
-    }
-
-    /**
-     * Delete entity
-     */
-    @Deprecated
-    public void delete() throws Exception {
-        checkHttpClient();
-        httpClient.delete(urlPath());
     }
 }

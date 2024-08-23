@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Connection extends Entity {
+public class Connection extends NamedEntity {
 
     // TODO: 参考连接器的 manifest (应该在 server 端做映射)
     public static final String MYSQL = "mysql";
@@ -64,11 +64,11 @@ public class Connection extends Entity {
      * for json deserialize
      */
     private Connection() {
-        super(null);
+        super();
     }
 
-    public Connection(@NotNull String id, @NotNull HttpClient client) {
-        super(id, client);
+    public Connection(@NotNull String name, @NotNull HttpClient client) {
+        super(name, client);
     }
 
     private static String leftUntil(String value, String... search) {

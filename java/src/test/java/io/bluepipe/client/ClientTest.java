@@ -49,25 +49,13 @@ class ClientTest {
         config.setTitle(" 测试啦啦 ");
         config.setUserInfo("root", "123456");
         config.setOption("key1", "value1");
-
-        //client.delete(config);
         config.save();
 
-        /*
-        config = client.getConnection("mysql.dev");
-        assertNotNull(config);
-
-
-         */
         config = new Connection("ydb.dev", client);
-
         config.setAddress("postgresql://demo-postgres:5432/postgres", 20);
         config.setTitle("测试PG");
         config.setUserInfo("postgres", "123456");
-        //client.delete(config);
         config.save();
-
-        //assertThrows(ServiceException.class, () -> client.getConnection("i.am.not.exists"));
     }
 
     @Test
@@ -78,17 +66,14 @@ class ClientTest {
         CopyTask config = CopyTask.Builder.create()
                 .source("mysql.dev", "tpch", "*")
                 .target("ydb.dev", "tpch_test", "v1_{table}")
-                .fields("*", "{field}")
-                .defaultOptions(Context.Default())
+                .fields("*", "{field}_new")
+                .options(Context.Default())
                 .build();
 
         Application app = new Application("demo-app", client);
         app.setTitle("测试 SDK");
-
         app.attach(config);
-
         app.pause();
-        System.out.println(app);
     }
-    
+
 }

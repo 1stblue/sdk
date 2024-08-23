@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Instance extends Entity {
+public class Instance extends NamedEntity {
 
     public Instance() {
         this("", null);

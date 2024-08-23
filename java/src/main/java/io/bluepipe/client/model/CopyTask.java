@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bluepipe.client.Context;
-import io.bluepipe.client.core.HttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -23,7 +22,7 @@ public class CopyTask extends Entity {
 
     // for json deserialize
     private CopyTask() {
-        super(null);
+        super();
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -128,7 +127,7 @@ public class CopyTask extends Entity {
             return this;
         }
 
-        public Builder defaultOptions(Context context) {
+        public Builder options(Context context) {
             if (null != context) {
                 for (String key : context.keySet()) {
                     output.setOption(key, context.get(key));

@@ -52,10 +52,8 @@ public class Context extends HashMap<String, Object> {
      * @param snapshot    复制全量
      * @param incremental 复制增量
      */
-    @Deprecated
-    public void scope(boolean snapshot, boolean incremental) {
+    private void scope(boolean snapshot, boolean incremental) {
         if (incremental) {
-            // TODO:
             put("auto_method", "CDC");
         }
     }
