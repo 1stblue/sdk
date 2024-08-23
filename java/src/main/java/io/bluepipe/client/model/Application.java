@@ -26,11 +26,6 @@ public class Application extends NamedEntity {
         }
     }
 
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-    }
-
     /**
      * Attach CopyTask to current application.
      * 在同一个应用内:
