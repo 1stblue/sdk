@@ -29,11 +29,6 @@ public class Application extends NamedEntity {
     @Override
     public void setTitle(String title) {
         super.setTitle(title);
-        try {
-            save();
-        } catch (Exception ex) {
-            // ignore
-        }
     }
 
     /**
@@ -47,13 +42,13 @@ public class Application extends NamedEntity {
     public void attach(@NotNull CopyTask config) throws Exception {
         checkHttpClient();
         Object result = httpClient.post("/next/task" + urlPath(), config);
-        System.out.println(result);
         if (null != result) {
             Application app = jackson.convertValue(result, Application.class);
             if (null == id || id.isEmpty()) {
                 id = app.id;
             }
         }
+        save();
     }
 
     /**
@@ -82,6 +77,7 @@ public class Application extends NamedEntity {
      */
     @Deprecated
     public List<Instance> calibrate(String... table) {
+        // /job/.../start
         throw new RuntimeException("Not implemented yet");
     }
 
@@ -92,13 +88,11 @@ public class Application extends NamedEntity {
      * @param incremental or not
      */
     public void start(boolean snapshot, boolean incremental) throws Exception {
+        checkHttpClient();
         if (incremental) {
             setOption("auto_method", "CDC");
         }
-
-        setOption("automatic", true);
-        save();
-        // TODO: check cdc instances
+        httpClient.post("/job" + urlPath("automatic", "enable"), null);
     }
 
     /**
@@ -106,10 +100,7 @@ public class Application extends NamedEntity {
      */
     public void pause() throws Exception {
         checkHttpClient();
-        //setOption("auto_method", "NONE");
-        setOption("automatic", false);
-        save();
-        // TODO: kill all running cdc instances
+        httpClient.post("/job" + urlPath("automatic", "disable"), null);
     }
 
     /**

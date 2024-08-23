@@ -55,6 +55,7 @@ class ClientTest {
         config.setAddress("postgresql://demo-postgres:5432/postgres", 20);
         config.setTitle("测试PG");
         config.setUserInfo("postgres", "123456");
+
         config.save();
     }
 
@@ -73,6 +74,8 @@ class ClientTest {
         Application app = new Application("demo-app", client);
         app.setTitle("测试 SDK");
         app.attach(config);
+
+        app.start(true, true);
         app.pause();
     }
 
