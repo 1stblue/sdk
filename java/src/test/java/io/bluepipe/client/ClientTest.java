@@ -94,6 +94,7 @@ class ClientTest {
         Client client = Client.create(testAddress, testApiKey, testSecret);
         //client.save(config);
         client.submit(config, Context.Default());
+        
     }
 
 }
