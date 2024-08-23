@@ -97,8 +97,10 @@ public class Application extends NamedEntity {
 
     /**
      * Pause to schedule the application
+     *
+     * @param killRunning Kill all running instances
      */
-    public void pause() throws Exception {
+    public void pause(boolean killRunning) throws Exception {
         checkHttpClient();
         httpClient.post("/job" + urlPath("automatic", "disable"), null);
     }

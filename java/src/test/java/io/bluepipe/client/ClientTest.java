@@ -76,7 +76,7 @@ class ClientTest {
         app.attach(config);
 
         app.start(true, true);
-        app.pause();
+        app.pause(true);
     }
 
 }
